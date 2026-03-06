@@ -1,35 +1,124 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import type { RouteRecordRaw } from 'vue-router'
+import { message } from 'ant-design-vue'
 import HomePage from '@/pages/HomePage.vue'
+import NotebookDetailPage from '@/pages/notebook/NotebookDetailPage.vue'
 import UserLoginPage from '@/pages/user/UserLoginPage.vue'
 import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
+import NotebookManagePage from '@/pages/admin/NotebookManagePage.vue'
+import UserProfilePage from '@/pages/user/UserProfilePage.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
+import MyNotesPage from '@/pages/user/MyNotesPage.vue'
+
+// 扩展 RouteMeta 类型
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    requiresAdmin?: boolean
+    hideLayout?: boolean
+  }
+}
+
+const routes: RouteRecordRaw[] = [
+  // ===== 公开路由（无需登录）=====
+  {
+    path: '/',
+    component: HomePage,
+    // hideLayout: true 让 BasicLayout 不渲染 GlobalHeader，首页使用自带 top-nav
+    meta: { requiresAuth: false, hideLayout: true },
+  },
+  {
+    path: '/user/login',
+    component: UserLoginPage,
+    meta: { requiresAuth: false, hideLayout: true },
+  },
+  {
+    path: '/user/register',
+    component: UserRegisterPage,
+    meta: { requiresAuth: false, hideLayout: true },
+  },
+
+  // ===== 需要登录的路由 =====
+  {
+    path: '/notebook/:id',
+    component: NotebookDetailPage,
+    meta: { requiresAuth: true, hideLayout: true },
+  },
+  {
+    path: '/user/profile',
+    component: UserProfilePage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/user/notes',
+    component: MyNotesPage,
+    meta: { requiresAuth: true },
+  },
+
+  // ===== 管理员路由（嵌套 AdminLayout）=====
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: 'userManage',
+        component: UserManagePage,
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+      {
+        path: 'notebookManage',
+        component: NotebookManagePage,
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+    ],
+  },
+
+  // ===== 旧路径兼容重定向 =====
+  { path: '/admin/userManage', redirect: '/admin/userManage' },
+  { path: '/admin/notebookManage', redirect: '/admin/notebookManage' },
+
+  // ===== 404 fallback =====
+  { path: '/:pathMatch(.*)*', redirect: '/' },
+]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: '主页',
-      component: HomePage,
-    },
-    {
-      path: '/user/login',
-      name: '用户登录',
-      component: UserLoginPage,
-    },
-    {
-      path: '/user/register',
-      name: '用户注册',
-      component: UserRegisterPage,
-    },
-    {
-      path: '/admin/userManage',
-      name: '用户管理',
-      component: UserManagePage,
-    },
-  ],
+  history: createWebHistory(),
+  routes,
+})
 
+// ===== 全局路由守卫 =====
+let initialized = false
+
+router.beforeEach(async (to, _from, next) => {
+  // 延迟导入避免循环依赖
+  const { useLoginUserStore } = await import('@/stores/loginUser')
+  const loginUserStore = useLoginUserStore()
+
+  // 首次访问时尝试获取登录态（避免刷新页面丢失状态）
+  if (!initialized) {
+    await loginUserStore.fetchLoginUser()
+    initialized = true
+  }
+
+  const isLoggedIn = !!loginUserStore.loginUser.id
+  const isAdmin = loginUserStore.loginUser.userRole === 'admin'
+
+  // 需要登录但未登录
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    next(`/user/login?redirect=${encodeURIComponent(to.fullPath)}`)
+    return
+  }
+
+  // 需要管理员权限但当前用户不是管理员
+  if (to.meta.requiresAdmin && !isAdmin) {
+    message.warning('无权限访问管理页面')
+    next('/')
+    return
+  }
+
+  next()
 })
 
 export default router

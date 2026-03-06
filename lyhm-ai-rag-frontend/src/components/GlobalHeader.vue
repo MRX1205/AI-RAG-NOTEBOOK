@@ -25,7 +25,8 @@
           <div v-if="loginUserStore.loginUser.id">
             <a-dropdown>
               <a-space>
-                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                <!-- 头像路径为相对路径，需加 /api 前缀通过 Vite 代理访问 -->
+              <a-avatar :src="loginUserStore.loginUser.userAvatar ? '/api' + loginUserStore.loginUser.userAvatar : undefined" />
                 {{ loginUserStore.loginUser.userName ?? '无名' }}
               </a-space>
               <template #overlay>
@@ -85,39 +86,35 @@ router.afterEach((to) => {
 
 // 菜单配置项
 const menuItems = computed(() => {
-  const items = [
-    {
-      key: '/',
-      label: '首页',
-      title: '首页',
-    },
+  const isLoggedIn = !!loginUserStore.loginUser.id
+  const isAdmin = loginUserStore.loginUser.userRole === 'admin'
+
+  const items: any[] = [
+    { key: '/', label: '首页', title: '首页' },
   ]
-  // 仅管理员可见
-  if (loginUserStore.loginUser.userRole === 'admin') {
-    items.push({
-      key: '/admin/userManage',
-      label: '用户管理',
-      title: '用户管理',
-    })
+
+  if (isLoggedIn) {
+    items.push({ key: '/user/notes', label: '我的笔记', title: '我的笔记' })
+    items.push({ key: '/user/profile', label: '个人中心', title: '个人中心' })
   }
-  items.push(
-    {
-      key: '/about',
-      label: '关于',
-      title: '关于我们',
-    },
-    {
-      key: 'others',
-      label: h('a', { href: 'http://lyhlz.cn', target: '_blank' }, '掠影航猫'),
-      title: '掠影航猫',
-    }
-  )
+
+  if (isAdmin) {
+    items.push({ key: '/admin/userManage', label: '用户管理', title: '用户管理' })
+    items.push({ key: '/admin/notebookManage', label: '笔记管理', title: '笔记管理' })
+  }
+
+  items.push({ key: 'others', label: '掠影航猫', title: '掠影航猫' })
+
   return items
 })
 
 // 处理菜单点击
 const handleMenuClick: MenuProps['onClick'] = (e) => {
   const key = e.key as string
+  if (key === 'others') {
+    window.open('http://lyhlz.cn', '_blank')
+    return
+  }
   selectedKeys.value = [key]
   // 跳转到对应页面
   if (key.startsWith('/')) {
@@ -130,6 +127,10 @@ const handleMenuClick: MenuProps['onClick'] = (e) => {
 .header {
   background: #fff;
   padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(74, 144, 217, 0.05);
+  display: flex;
+  align-items: center;
 }
 
 .header-left {
@@ -139,17 +140,51 @@ const handleMenuClick: MenuProps['onClick'] = (e) => {
 }
 
 .logo {
-  height: 48px;
-  width: 48px;
+  height: 40px;
+  width: 40px;
 }
 
 .site-title {
   margin: 0;
-  font-size: 18px;
-  color: #1890ff;
+  font-size: 20px;
+  color: var(--primary-color);
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-.ant-menu-horizontal {
+:deep(.ant-menu-horizontal) {
   border-bottom: none !important;
+  line-height: 64px;
+}
+
+:deep(.ant-menu-item) {
+  transition: all 0.3s ease;
+  border-radius: var(--border-radius);
+  margin: 0 4px !important;
+  padding: 0 16px !important;
+  line-height: 40px !important;
+  height: 40px !important;
+  margin-top: 12px !important;
+}
+
+:deep(.ant-menu-item:hover) {
+  background-color: var(--bg-block-light) !important;
+  color: var(--primary-hover) !important;
+}
+
+:deep(.ant-menu-item-selected) {
+  background-color: var(--bg-block-light) !important;
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+:deep(.ant-menu-item::after) {
+  display: none !important;
+}
+
+.user-login-status {
+  display: flex;
+  align-items: center;
+  height: 64px;
 }
 </style>
