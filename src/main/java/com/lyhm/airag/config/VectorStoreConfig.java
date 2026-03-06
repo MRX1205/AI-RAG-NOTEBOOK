@@ -97,6 +97,37 @@ public class VectorStoreConfig {
     }
 
     /**
+     * 将源笔记本的向量存储复制到目标笔记本（克隆功能使用）
+     * <p>
+     * 将源笔记本的向量存储 JSON 文件复制一份，保存为目标笔记本的 JSON 文件，
+     * 使克隆后的笔记本立即具备 RAG 检索能力，无需重新 Embedding。
+     * </p>
+     *
+     * @param sourceNotebookId 源笔记本 ID
+     * @param targetNotebookId 目标笔记本 ID
+     */
+    public void copyStore(Long sourceNotebookId, Long targetNotebookId) {
+        // 先确保源笔记本的向量存储已被持久化到文件
+        persistStore(sourceNotebookId);
+
+        Path sourcePath = getStorePath(sourceNotebookId);
+        Path targetPath = getStorePath(targetNotebookId);
+
+        if (!Files.exists(sourcePath)) {
+            log.info("源笔记本 {} 没有向量存储文件，跳过复制", sourceNotebookId);
+            return;
+        }
+
+        try {
+            Files.createDirectories(targetPath.getParent());
+            Files.copy(sourcePath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            log.info("向量存储已从笔记本 {} 复制到 {}", sourceNotebookId, targetNotebookId);
+        } catch (IOException e) {
+            log.error("复制向量存储失败: {} -> {}", sourceNotebookId, targetNotebookId, e);
+        }
+    }
+
+    /**
      * 删除指定笔记本的向量存储（内存 + 文件）
      *
      * @param notebookId 笔记本 ID

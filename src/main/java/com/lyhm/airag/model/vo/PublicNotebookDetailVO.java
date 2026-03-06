@@ -4,18 +4,19 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * 精选笔记本视图对象（公开接口使用）
+ * 公开精选笔记本详情 VO（用于未登录用户浏览，不包含敏感信息）
  * <p>
- * 包含所属用户名，用于首页精选展示区域
+ * 包含笔记本基本信息 + 来源列表（只读预览）
  * </p>
  */
 @Data
-public class FeaturedNotebookVO implements Serializable {
+public class PublicNotebookDetailVO implements Serializable {
 
     /**
-     * 笔记本ID
+     * 笔记本 ID
      */
     private Long id;
 
@@ -30,12 +31,12 @@ public class FeaturedNotebookVO implements Serializable {
     private String description;
 
     /**
-     * 摘要简介（精选卡片首要展示内容）
+     * 摘要简介
      */
     private String summary;
 
     /**
-     * 封面图片URL
+     * 封面图片 URL
      */
     private String coverImage;
 
@@ -45,7 +46,7 @@ public class FeaturedNotebookVO implements Serializable {
     private String userName;
 
     /**
-     * 来源数量（用于精选卡片显示）
+     * 来源数量
      */
     private Integer sourceCount;
 
@@ -53,4 +54,9 @@ public class FeaturedNotebookVO implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 来源列表（只读，展示文件名、类型等元数据）
+     */
+    private List<SourceVO> sources;
 }

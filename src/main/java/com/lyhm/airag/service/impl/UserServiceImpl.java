@@ -300,12 +300,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (file.getSize() > 2 * 1024 * 1024) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件不能超过2MB");
         }
-        // 保存文件
+        // 保存文件（toAbsolutePath 避免 transferTo 把相对路径解析到 Tomcat 工作目录）
         String savedFileName = java.util.UUID.randomUUID() + "." + extension;
-        java.nio.file.Path savePath = java.nio.file.Paths.get(uploadDir, "avatars", savedFileName);
+        java.nio.file.Path savePath = java.nio.file.Paths.get(uploadDir, "avatars", savedFileName)
+                .toAbsolutePath().normalize();
         try {
             java.nio.file.Files.createDirectories(savePath.getParent());
-            file.transferTo(savePath.toFile());
+            // 用 Files.copy + InputStream 代替 transferTo，规避 Tomcat 相对路径问题
+            try (java.io.InputStream inputStream = file.getInputStream()) {
+                java.nio.file.Files.copy(inputStream, savePath,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (java.io.IOException e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "头像保存失败");
         }

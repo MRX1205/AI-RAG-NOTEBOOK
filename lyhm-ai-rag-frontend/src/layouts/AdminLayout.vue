@@ -11,23 +11,31 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons-vue'
 import { ref } from 'vue'
 
 const router = useRouter()
 const route = useRoute()
 const loginUserStore = useLoginUserStore()
+// 直接引用 store 中的 reactive 对象，保证头像/用户名修改后实时同步
 const loginUser = loginUserStore.loginUser
 
 const collapsed = ref(false)
 
 const selectedKeys = computed(() => {
+  if (route.path.includes('dashboard')) return ['dashboard']
   if (route.path.includes('userManage')) return ['userManage']
   if (route.path.includes('notebookManage')) return ['notebookManage']
-  return []
+  return ['dashboard']
 })
 
 const menuItems = [
+  {
+    key: 'dashboard',
+    icon: DashboardOutlined,
+    label: '仪表盘',
+  },
   {
     key: 'userManage',
     icon: UserOutlined,
@@ -112,7 +120,10 @@ const avatarLetter = computed(() => userDisplayName.value.charAt(0).toUpperCase(
             </template>
           </a-button>
           <span class="header-title">
-            {{ route.path.includes('userManage') ? '用户管理' : '笔记本管理' }}
+            {{
+              route.path.includes('dashboard') ? '仪表盘' :
+              route.path.includes('userManage') ? '用户管理' : '笔记本管理'
+            }}
           </span>
         </div>
         <div class="header-right">

@@ -161,6 +161,26 @@ public class NotebookController {
         return ResultUtils.success(coverUrl);
     }
 
+    // ==================== 克隆接口（需登录）====================
+
+    /**
+     * 克隆精选笔记本为个人副本
+     * 接口路径：POST /notebook/{id}/clone
+     * 权限要求：已登录用户
+     * <p>
+     * 将指定精选笔记本的所有数据复制一份，归属到当前登录用户，
+     * 原笔记本任何数据不受影响。
+     * </p>
+     */
+    @PostMapping("/{id}/clone")
+    public BaseResponse<Long> cloneNotebook(@PathVariable Long id,
+            HttpServletRequest request) {
+        ThrowUtils.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        Long newNotebookId = notebookService.cloneNotebook(id, loginUser.getId());
+        return ResultUtils.success(newNotebookId);
+    }
+
     // ==================== 管理员接口 ====================
 
     /**

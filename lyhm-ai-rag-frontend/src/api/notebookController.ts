@@ -132,3 +132,33 @@ export async function adminToggleFeatured(
         ...(options || {}),
     })
 }
+
+/** 获取公开精选笔记本列表（无需登录）GET /public/notebooks/featured */
+export async function getPublicFeaturedNotebooks(options?: { [key: string]: any }) {
+    return request<API.BaseResponseFeaturedNotebookVOList>('/public/notebooks/featured', {
+        method: 'GET',
+        ...(options || {}),
+    })
+}
+
+/** 获取单个精选笔记本公开详情（含来源列表，无需登录）GET /public/notebooks/{id} */
+export async function getPublicNotebookDetail(
+    id: string | number,
+    options?: { [key: string]: any },
+) {
+    return request<API.BaseResponsePublicNotebookDetailVO>(`/public/notebooks/${id}`, {
+        method: 'GET',
+        ...(options || {}),
+    })
+}
+
+/** 克隆精选笔记本为个人副本（需登录）POST /notebook/{id}/clone */
+export async function cloneNotebook(
+    id: string | number,
+    options?: { [key: string]: any },
+) {
+    return request<API.BaseResponseLong>(`/notebook/${id}/clone`, {
+        method: 'POST',
+        ...(options || {}),
+    })
+}

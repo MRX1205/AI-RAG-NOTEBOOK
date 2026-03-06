@@ -179,7 +179,27 @@ declare namespace API {
     summary?: string
     coverImage?: string
     userName?: string
+    sourceCount?: number
     createTime?: string
+  }
+
+  /** 公开精选笔记本详情（含来源列表，无需登录）*/
+  type PublicNotebookDetailVO = {
+    id?: string | number
+    title?: string
+    description?: string
+    summary?: string
+    coverImage?: string
+    userName?: string
+    sourceCount?: number
+    createTime?: string
+    sources?: SourceVO[]
+  }
+
+  type BaseResponsePublicNotebookDetailVO = {
+    code?: number
+    data?: PublicNotebookDetailVO
+    message?: string
   }
 
   type NotebookAddRequest = {
@@ -389,6 +409,19 @@ declare namespace API {
   type BaseResponsePageSavedNoteVO = {
     code?: number
     data?: PageSavedNoteVO
+    message?: string
+  }
+
+  /** 管理员仪表盘统计数据 */
+  type AdminStatsVO = {
+    userCount?: number
+    notebookCount?: number
+    sourceCount?: number
+  }
+
+  type BaseResponseAdminStatsVO = {
+    code?: number
+    data?: AdminStatsVO
     message?: string
   }
 }

@@ -8,10 +8,11 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const loginUserStore = useLoginUserStore()
+// 直接引用 store 中的 reactive 对象，保证响应式同步
 const loginUser = loginUserStore.loginUser
 
 // ===== 头像 =====
-// 头像路径为相对路径（如 /uploads/avatars/xxx.jpg），需加 /api 前缀才能通过 Vite 代理访问后端
+// 头像路径为相对路径（如 /uploads/avatars/xxx.jpg），需加 /api 前缀通过 Vite 代理访问后端
 const avatarPreview = ref<string>(loginUser.userAvatar ? '/api' + loginUser.userAvatar : '')
 const avatarFileRef = ref<HTMLInputElement | null>(null)
 const uploadingAvatar = ref(false)
@@ -56,7 +57,7 @@ const onAvatarFileChange = async (e: Event) => {
     const res = await uploadAvatar(formData)
     if (res.data.code === 0) {
       message.success('头像上传成功')
-      // 更新 store 中用户头像
+      // 更新 store 中用户头像（setLoginUser 会原地更新 reactive 对象，所有组件同步刷新）
       loginUserStore.setLoginUser({ ...loginUser, userAvatar: res.data.data })
     } else {
       message.error('上传失败：' + res.data.message)
@@ -69,6 +70,7 @@ const onAvatarFileChange = async (e: Event) => {
 }
 
 // ===== 修改用户名 =====
+// 初始值从 store 中读取当前用户名
 const newUserName = ref(loginUser.userName || '')
 const savingName = ref(false)
 

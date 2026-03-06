@@ -2,11 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { message } from 'ant-design-vue'
 import HomePage from '@/pages/HomePage.vue'
+import ExplorePage from '@/pages/ExplorePage.vue'
+import ExploreDetailPage from '@/pages/ExploreDetailPage.vue'
 import NotebookDetailPage from '@/pages/notebook/NotebookDetailPage.vue'
 import UserLoginPage from '@/pages/user/UserLoginPage.vue'
 import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
 import NotebookManagePage from '@/pages/admin/NotebookManagePage.vue'
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage.vue'
 import UserProfilePage from '@/pages/user/UserProfilePage.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import MyNotesPage from '@/pages/user/MyNotesPage.vue'
@@ -38,6 +41,17 @@ const routes: RouteRecordRaw[] = [
     component: UserRegisterPage,
     meta: { requiresAuth: false, hideLayout: true },
   },
+  // ===== 公开精选浏览路由（无需登录）=====
+  {
+    path: '/explore',
+    component: ExplorePage,
+    meta: { requiresAuth: false, hideLayout: true },
+  },
+  {
+    path: '/explore/:id',
+    component: ExploreDetailPage,
+    meta: { requiresAuth: false, hideLayout: true },
+  },
 
   // ===== 需要登录的路由 =====
   {
@@ -56,12 +70,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
 
-  // ===== 管理员路由（嵌套 AdminLayout）=====
+  // ===== 管理员路由（嵌套 AdminLayout，需管理员权限）=====
   {
     path: '/admin',
     component: AdminLayout,
+    redirect: '/admin/dashboard',   // 直接访问 /admin 时跳转到仪表盘
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
+      {
+        path: 'dashboard',
+        component: AdminDashboardPage,
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
       {
         path: 'userManage',
         component: UserManagePage,
@@ -74,10 +94,6 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
-
-  // ===== 旧路径兼容重定向 =====
-  { path: '/admin/userManage', redirect: '/admin/userManage' },
-  { path: '/admin/notebookManage', redirect: '/admin/notebookManage' },
 
   // ===== 404 fallback =====
   { path: '/:pathMatch(.*)*', redirect: '/' },
