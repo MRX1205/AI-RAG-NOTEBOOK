@@ -28,6 +28,13 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <!-- LangChain4j 版本说明：
+             核心模块使用稳定版 1.1.0；Spring Boot Starter 和社区模块使用对应 beta 版。
+             这是 LangChain4j 的常见发布节奏，两组版本 API 兼容，已验证编译通过。
+             Apache Tika 解析器版本号完全独立，保持已验证版本。 -->
+        <langchain4j.core.version>1.1.0</langchain4j.core.version>
+        <langchain4j.integration.version>1.1.0-beta7</langchain4j.integration.version>
+        <langchain4j.tika.version>1.10.0-beta18</langchain4j.tika.version>
     </properties>
     <dependencies>
         <dependency>
@@ -93,26 +100,42 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
-        <!-- langchain4j -->
+        <!-- langchain4j 核心（稳定版） -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-            <version>1.1.0</version>
+            <version>${langchain4j.core.version}</version>
         </dependency>
-        <!-- langchain4j与springboot 框架集合的依赖 -->
+        <!-- langchain4j 与 Spring Boot 集成 -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-            <version>1.1.0-beta7</version>
+            <version>${langchain4j.integration.version}</version>
         </dependency>
-        <!-- langchain4j-reactor的依赖 -->
+        <!-- langchain4j-reactor（响应式流支持） -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-reactor</artifactId>
-            <version>1.1.0-beta7</version>
+            <version>${langchain4j.integration.version}</version>
         </dependency>
-
-
+        <!-- 百炼 DashScope 大模型集成（Embedding 模型） -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-community-dashscope</artifactId>
+            <version>${langchain4j.integration.version}</version>
+        </dependency>
+        <!-- LangChain4j 文档解析器（Apache Tika，支持 PDF/DOCX/TXT 等格式）
+             注：Apache Tika 解析器版本号独立发布，与核心版本不同步 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-document-parser-apache-tika</artifactId>
+            <version>${langchain4j.tika.version}</version>
+        </dependency>
+        <!-- WebFlux（SSE 流式响应支持） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 
 
 
@@ -136,6 +159,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- 解决 DashScope SDK（OkHttp）在部分环境下 SSL 握手失败的问题 -->
+                    <jvmArguments>
+                        -Dhttps.protocols=TLSv1.2,TLSv1.3
+                        -Djdk.tls.client.protocols=TLSv1.2,TLSv1.3
+                    </jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

@@ -1,4 +1,4 @@
-# AI
+# AI - DeepSeek 大模型配置
 langchain4j:
   open-ai:
     chat-model:
@@ -14,3 +14,20 @@ langchain4j:
       max-tokens: 8192
       log-requests: true
       log-responses: true
+
+# 百炼 DashScope Embedding 模型配置
+dashscope:
+  api-key: sk-085a670171b145e3840e25495bc71626
+  embedding:
+    model-name: text-embedding-v3
+
+# 文件上传配置
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+# 文件存储路径
+file:
+  upload-dir: ./uploads

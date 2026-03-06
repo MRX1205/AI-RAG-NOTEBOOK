@@ -73,6 +73,12 @@ public class User implements Serializable {
     private String userRole;
 
     /**
+     * 账号状态：0-禁用，1-启用
+     */
+    @Column("status")
+    private Integer status;
+
+    /**
      * 编辑时间
      */
     @Column("editTime")

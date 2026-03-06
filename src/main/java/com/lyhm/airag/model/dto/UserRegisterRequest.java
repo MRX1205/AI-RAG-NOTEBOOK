@@ -23,4 +23,14 @@ public class UserRegisterRequest implements Serializable {
      * 确认密码
      */
     private String checkPassword;
+
+    /**
+     * 注册角色：user（普通用户）/ admin（管理员），默认 user
+     */
+    private String role;
+
+    /**
+     * 管理员注册码（role=admin 时必填）
+     */
+    private String adminCode;
 }
