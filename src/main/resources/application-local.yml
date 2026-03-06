@@ -3,13 +3,13 @@ langchain4j:
   open-ai:
     chat-model:
       base-url: https://api.deepseek.com
-      api-key: sk-619b75652714424da46123503042e197
+      api-key: 
       model-name: deepseek-chat
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
-      api-key: sk-619b75652714424da46123503042e197
+      api-key: 
       model-name: deepseek-chat
       max-tokens: 8192
       log-requests: true
@@ -17,7 +17,7 @@ langchain4j:
 
 # 百炼 DashScope Embedding 模型配置
 dashscope:
-  api-key: sk-085a670171b145e3840e25495bc71626
+  api-key:
   embedding:
     model-name: text-embedding-v3
 
